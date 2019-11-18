@@ -4,12 +4,12 @@ from datetime import datetime
 from pandas   import DataFrame
 from time     import time, sleep, gmtime
 
-from utility_get_mongo_db_trade import login_mongo
+from mongo_settings import mongo_coll_cursor
 import utility_check_port_trade
 from pandas_settings import set_options_pd
 set_options_pd(precision = 9)
 
-print('fill_klines', __name__, 'my name is tito')
+print('fill_klines', __name__)
 #from update_activity import check_activity
 
 def make_kline_df(s_d, interval):

@@ -5,7 +5,7 @@ from pandas   import DataFrame
 from time     import time, sleep, gmtime
 
 from mongo_settings import mongo_coll_cursor
-import utility_check_port_trade
+import network_fxns
 from pandas_settings import set_options_pd
 set_options_pd(precision = 9)
 
@@ -62,7 +62,7 @@ def save_klines_to_db(s_d, k_df, interval):
     # df to dict list
     k_dl = k_df.to_dict('records')
     collection_name = '{0}_{1}'.format(s_d['symbol'], interval)
-    cursor = login_mongo('trade')[collection_name]
+    cursor = mongo_coll_cursor(collection_name)
 
     cursor.insert_many(k_dl, ordered = False)
     new_list = list(cursor.find({}))
@@ -85,7 +85,7 @@ def update_klines_to_db(s_d, s_df, interval):
 
     # get cursor
     collection_name = '{0}_{1}'.format(s_d['symbol'], interval)
-    cursor = login_mongo('trade')[collection_name]
+    cursor = mongo_coll_cursor(collection_name)
 
     # update every value based on datetime
     for i in s_l:
@@ -144,7 +144,7 @@ def fill_kline_gap(s_d, interval, minute_diff, latest_dt):
 
 def get_kline_history(s_d, interval):
     collection_name = '{0}_{1}'.format(s_d['symbol'], interval)
-    cursor = login_mongo('trade')[collection_name]
+    cursor = mongo_coll_cursor(collection_name)
     coll_ct = int(cursor.count())
 
     if   coll_ct == 1999: pass
@@ -171,7 +171,7 @@ def get_kline_history(s_d, interval):
 def run_fill_klines():
     # 1 check for klines
     # 1a get all coin status
-    cursor = login_mongo('trade')['all_symbols_status']
+    cursor = mongo_coll_cursor('all_symbols_status')
     list_of_active_symbols = list(cursor.find({'activity_status': 1}, {'_id': 0, 'dt_status': 0, 'baseAssetPrecision': 0, 'filters': 0, 'orderTypes':0,'isSpotTradingAllowed':0, 'isMarginTradingAllowed':0, 'icebergAllowed':0,'quotePrecision':0,'baseAsset':0}))
     
     # 1 thru 8
@@ -196,3 +196,4 @@ if __name__ == "__main__":
         looptime = time()
         run_fill_klines()
         print('fill_klines.py     dt now: {0}     loop time: {2:.4f} s'.format(datetime.now(), time() - looptime))
+        sleep(1)
